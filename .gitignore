@@ -1,0 +1,18 @@
+# Environment / secrets — never commit these
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# n8n runtime data
+.n8n/
+database.sqlite
+binaryData/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

@@ -1,0 +1,437 @@
+{
+  "id": "r90nu_nV33Hxjnqy6sboh",
+  "name": "Dev-Subs-Summaries",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -96,
+        -176
+      ],
+      "id": "408a3746-441d-4689-8767-d87636d74be6",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  { json: { url: 'https://blog.bytebytego.com/feed', source: 'ByteByteGo' } },\n  { json: { url: 'https://newsletter.pragmaticengineer.com/feed', source: 'Pragmatic Engineer' } },\n  { json: { url: 'https://www.theneuron.ai/feed/', source: 'The Neuron' } },\n  { json: { url: 'https://www.minmaxgeek.com/?format=rss', source: 'MinMaxGeek' } },\n  { json: { url: 'https://www.kdnuggets.com/feed', source: 'KDNuggets' } },\n  //{ json: { url: 'https://github.com/php/php-src/releases.atom', source: 'PHP Releases' } },\n  //{ json: { url: 'https://github.com/magento/magento2/releases.atom', source: 'Adobe Commerce (Magento 2)' } },\n  //{ json: { url: 'https://github.com/medusajs/medusa/releases.atom', source: 'MedusaJS' } },\n  //{ json: { url: 'https://astro.build/rss.xml', source: 'AstroJS' } },\n  //{ json: { url: 'https://developer.squareup.com/blog/rss/', source: 'Square Dev Blog' } },\n  //{ json: { url: 'https://www.postgresql.org/news.rss', source: 'PostgreSQL' } },\n  //{ json: { url: 'https://blogs.oracle.com/mysql/rss', source: 'MySQL' } },\n  //{ json: { url: 'https://mariadb.org/feed/', source: 'MariaDB' } },\n  //{ json: { url: 'https://github.com/redis/redis/releases.atom', source: 'Redis' } },\n  //{ json: { url: 'https://github.com/pnpm/pnpm/releases.atom', source: 'pnpm' } },\n  //{ json: { url: 'https://github.com/rabbitmq/rabbitmq-server/releases.atom', source: 'RabbitMQ' } },\n  //{ json: { url: 'https://www.docker.com/blog/feed/', source: 'Docker' } },\n  //{ json: { url: 'https://archlinux.org/feeds/news/', source: 'Arch Linux' } },\n  //{ json: { url: 'https://ubuntu.com/blog/feed', source: 'Ubuntu' } },\n  //{ json: { url: 'https://github.com/neovim/neovim/releases.atom', source: 'Neovim' } },\n  //{ json: { url: 'https://forum.opnsense.org/index.php?board=11.0;type=rss;action=.xml', source: 'OPNsense' } }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        -176
+      ],
+      "id": "4808c1ae-c6aa-44c9-8e84-04b5ab548967",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        320,
+        -176
+      ],
+      "id": "d65ddbca-7b42-4374-9ac3-9ab366db9ac0",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b2747d9a-83e7-4e23-9c8e-22c962c78a01",
+              "leftValue": "={{ $json.pubDate }}",
+              "rightValue": "={{ $now.minus({hours: 2}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        528,
+        -176
+      ],
+      "id": "90d5d35a-9e8b-4bfa-9bc1-e00862cd23da",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a senior developer assistant. Read the provided article or release notes. Provide a 2-3 sentence technical summary of the core concepts, changes, or announcements. Be brief and highly technical.\n{{ $json.contentSnippet || $json.content || null}}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        736,
+        -176
+      ],
+      "id": "c7e9091d-5a0e-429f-9c87-cec9683e8905",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        736,
+        0
+      ],
+      "id": "1f787cce-3ade-4df9-af1f-7a2d413fb03f",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "XXWwfQLd2KspcYbi",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  // { json: { url: 'https://blog.bytebytego.com/feed', source: 'ByteByteGo' } },\n  // { json: { url: 'https://newsletter.pragmaticengineer.com/feed', source: 'Pragmatic Engineer' } },\n  // { json: { url: 'https://www.theneuron.ai/feed/', source: 'The Neuron' } },\n  // { json: { url: 'https://www.minmaxgeek.com/?format=rss', source: 'MinMaxGeek' } }\n  { json: { url: 'https://github.com/php/php-src/releases.atom', source: 'PHP Releases' } },\n  { json: { url: 'https://github.com/magento/magento2/releases.atom', source: 'Adobe Commerce (Magento 2)' } },\n  { json: { url: 'https://mariadb.org/feed/', source: 'MariaDB' } },\n  { json: { url: 'https://github.com/redis/redis/releases.atom', source: 'Redis' } },\n  { json: { url: 'https://www.docker.com/blog/feed/', source: 'Docker' } },\n  //{ json: { url: 'https://github.com/medusajs/medusa/releases.atom', source: 'MedusaJS' } },\n  //{ json: { url: 'https://astro.build/rss.xml', source: 'AstroJS' } },\n  //{ json: { url: 'https://developer.squareup.com/blog/rss/', source: 'Square Dev Blog' } },\n  //{ json: { url: 'https://www.postgresql.org/news.rss', source: 'PostgreSQL' } },\n  //{ json: { url: 'https://blogs.oracle.com/mysql/rss', source: 'MySQL' } },\n  //{ json: { url: 'https://github.com/pnpm/pnpm/releases.atom', source: 'pnpm' } },\n  //{ json: { url: 'https://github.com/rabbitmq/rabbitmq-server/releases.atom', source: 'RabbitMQ' } },\n  //{ json: { url: 'https://archlinux.org/feeds/news/', source: 'Arch Linux' } },\n  //{ json: { url: 'https://ubuntu.com/blog/feed', source: 'Ubuntu' } },\n  //{ json: { url: 'https://github.com/neovim/neovim/releases.atom', source: 'Neovim' } },\n  //{ json: { url: 'https://forum.opnsense.org/index.php?board=11.0;type=rss;action=.xml', source: 'OPNsense' } }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        256
+      ],
+      "id": "9fce19d1-2c94-4cf4-9810-23dfc43947ed",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        320,
+        256
+      ],
+      "id": "4c72e598-5a5f-4345-a542-349eef699ec2",
+      "name": "RSS Read1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b2747d9a-83e7-4e23-9c8e-22c962c78a01",
+              "leftValue": "={{ $json.pubDate }}",
+              "rightValue": "={{ $now.minus({hours: 2}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        528,
+        256
+      ],
+      "id": "2c0b91da-035a-4e36-93b3-1efc91785451",
+      "name": "Filter1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a senior developer assistant. Read the provided article or release notes. Provide a 2-3 sentence technical summary of the core concepts, changes, or announcements. Be brief and highly technical.\n{{ $json.contentSnippet || $json.content }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        736,
+        256
+      ],
+      "id": "9ee22898-af8b-4939-8afe-2de413897081",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        736,
+        432
+      ],
+      "id": "6569175d-f71d-41a5-a3a2-4c3c7bcf0091",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "XXWwfQLd2KspcYbi",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=Title: [{{ $('Code in JavaScript1').item.json.source }}] {{ $('Filter1').item.json.title }}\nURL: {{ $('Filter1').item.json.link }}\nDescription: {{ $json.output }}\n\n*━━━━━━━━━━━━━━━━━━━━━*",
+        "options": {},
+        "embeds": {
+          "values": [
+            {
+              "image": "="
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        1056,
+        256
+      ],
+      "id": "f8fbdd23-6e1b-4d19-b97f-07b69c88f1fb",
+      "name": "#dev-release-notes",
+      "webhookId": "8da070e8-f428-47cd-8ade-d9858cd1ad07",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "uCc3qUrOAGWOE1XP",
+          "name": "#dev-release-notes"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=Title: [{{ $('Code in JavaScript').item.json.source }}] {{ $('Filter').item.json.title }}\nURL: {{ $('Filter').item.json.link }}\nDescription: {{ $json.output }}\n\n*━━━━━━━━━━━━━━━━━━━━━*",
+        "options": {},
+        "embeds": {
+          "values": [
+            {
+              "image": "="
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        -176
+      ],
+      "id": "7581c4f4-51a8-4e1c-8dbd-0b6b39ceaa64",
+      "name": "#dev-blogs",
+      "webhookId": "8da070e8-f428-47cd-8ade-d9858cd1ad07",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "RevmVjKD6eIvbier",
+          "name": "#dev-blogs"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "#dev-blogs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "RSS Read1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read1": {
+      "main": [
+        [
+          {
+            "node": "Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "#dev-release-notes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "activeVersionId": "7150cd17-de60-4d07-b789-234ea4da94a1",
+  "versionCounter": 249,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-05-02T13:32:52.741Z",
+      "createdAt": "2026-05-02T13:32:52.741Z",
+      "role": "workflow:owner",
+      "workflowId": "r90nu_nV33Hxjnqy6sboh",
+      "projectId": "AEOc7ItfeVbix4Xj",
+      "project": {
+        "updatedAt": "2026-05-01T15:53:57.128Z",
+        "createdAt": "2026-05-01T15:52:52.704Z",
+        "id": "AEOc7ItfeVbix4Xj",
+        "name": "Brandon Broxterman <your-email@example.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "fffcfd66-9d8f-4fb2-a842-731844fe3100"
+      }
+    }
+  ]
+}

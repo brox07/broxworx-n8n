@@ -1,0 +1,329 @@
+{
+  "id": "sl82vmgdQiIn5e3EqtBYZ",
+  "name": "Obsidian Agent",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "getAll",
+        "guildId": {
+          "__rl": true,
+          "value": "YOUR_DISCORD_GUILD_ID",
+          "mode": "list",
+          "cachedResultName": "hotroddder",
+          "cachedResultUrl": "https://discord.com/channels/YOUR_DISCORD_GUILD_ID"
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "1527391628292128808",
+          "mode": "list",
+          "cachedResultName": "obsidian",
+          "cachedResultUrl": "https://discord.com/channels/YOUR_DISCORD_GUILD_ID/1527391628292128808"
+        },
+        "limit": 50,
+        "options": {
+          "simplify": true
+        }
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        -272
+      ],
+      "id": "5f261493-7def-4cae-a068-7e5d7c3b4e5f",
+      "name": "Get many messages",
+      "webhookId": "059c0f05-9953-435a-9852-1bb6aa773eb7",
+      "credentials": {
+        "discordBotApi": {
+          "id": "W7YBbBYCWMCmfd3D",
+          "name": "Obsidian"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "fbddebcb-70e0-4fc4-a9bb-a436a827c8ce",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        432,
+        208
+      ],
+      "id": "a7a715bb-21af-45b6-b3d3-6448c1ab77f2",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "cZJ5DlJ2NRM6EJy4",
+          "name": "Local-Postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discordTool",
+      "typeVersion": 2,
+      "position": [
+        576,
+        208
+      ],
+      "id": "0a9cd0a8-90de-47fe-b623-a60a3f5e934f",
+      "name": "Discord",
+      "webhookId": "8fb0bef9-8c90-4eea-8c72-250c4979d12c",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "0z70Gj9PYbhyo5CE",
+          "name": "Obsidian"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        288,
+        208
+      ],
+      "id": "cfb4a6a8-f61f-4308-8f80-7f7f2baa706e",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "XXWwfQLd2KspcYbi",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "48c80ae4-4c17-4674-b89b-f0a5449fa085",
+        "options": {
+          "responseCode": {
+            "values": {
+              "responseCode": 204
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -416,
+        -272
+      ],
+      "id": "d559e325-ffa8-4946-a846-f05cbdce06c8",
+      "name": "Webhook",
+      "webhookId": "48c80ae4-4c17-4674-b89b-f0a5449fa085"
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "guildId": {
+          "__rl": true,
+          "value": "YOUR_DISCORD_GUILD_ID",
+          "mode": "list",
+          "cachedResultName": "hotroddder",
+          "cachedResultUrl": "https://discord.com/channels/YOUR_DISCORD_GUILD_ID"
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "1527391628292128808",
+          "mode": "list",
+          "cachedResultName": "obsidian",
+          "cachedResultUrl": "https://discord.com/channels/YOUR_DISCORD_GUILD_ID/1527391628292128808"
+        },
+        "content": "=Previous message contents: \n{{ $json.content }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        464,
+        -272
+      ],
+      "id": "ef676a12-9650-402c-af1a-9f0c25a87d57",
+      "name": "Send a message",
+      "webhookId": "8ccc8430-e327-4076-acb5-715e53f0309d",
+      "credentials": {
+        "discordBotApi": {
+          "id": "W7YBbBYCWMCmfd3D",
+          "name": "Obsidian"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a1b4731d-5cbe-4c43-85f2-417138ff5f42",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        192,
+        -272
+      ],
+      "id": "f299168e-dd68-49ce-a319-b695f82e6ebf",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "jsCode": "var messages = new Array;\n\nfor (const message of $input.all()) {\n  if (!message.json.author.bot)\n    messages.push(message.json.content);\n  else\n    continue;\n}\n\nreturn messages"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        -272
+      ],
+      "id": "801ac030-0b54-45cb-a2cf-3e15439380ce",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "connections": {
+    "Get many messages": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Discord": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get many messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        []
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "activeVersionId": null,
+  "versionCounter": 283,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-07-16T15:41:34.026Z",
+      "createdAt": "2026-07-16T15:41:34.026Z",
+      "role": "workflow:owner",
+      "workflowId": "sl82vmgdQiIn5e3EqtBYZ",
+      "projectId": "AEOc7ItfeVbix4Xj",
+      "project": {
+        "updatedAt": "2026-05-01T15:53:57.128Z",
+        "createdAt": "2026-05-01T15:52:52.704Z",
+        "id": "AEOc7ItfeVbix4Xj",
+        "name": "Brandon Broxterman <your-email@example.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "fffcfd66-9d8f-4fb2-a842-731844fe3100"
+      }
+    }
+  ]
+}

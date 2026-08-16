@@ -1,0 +1,495 @@
+{
+  "id": "chVd0dSCUbOxpqvp",
+  "name": "Racing News",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -96,
+        -176
+      ],
+      "id": "f62001ce-3273-4d16-a422-3c752ef8e7a1",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  { json: { url: 'https://www.motorsport.com/rss/all/news/', source: 'Motorsport' } },\n  // { json: { url: 'https://www.autosport.com/rss/all/news/', source: 'Autosport' } },\n  // { json: { url: 'https://racer.com/category/feed', source: 'RACER' } },\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        -176
+      ],
+      "id": "6260a130-1fdc-481c-b9cb-89ba1e00e3b9",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        320,
+        -176
+      ],
+      "id": "c300aae4-86d0-4751-9d77-6a2c7fbdaa49",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b2747d9a-83e7-4e23-9c8e-22c962c78a01",
+              "leftValue": "={{ $json.pubDate }}",
+              "rightValue": "={{ $now.minus({hours: 2}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        528,
+        -176
+      ],
+      "id": "80924ec9-13f4-44df-9e6e-3b17c567f6ab",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a senior motorsport journalist. Read the provided article or press release. Provide a 2-3 sentence summary focusing on the core takeaways, such as race results, driver market updates, team strategies, or regulatory changes. Be brief, objective, and use precise racing terminology. Use the 'HTTP Request' tool for additional details, if necessary: \n{{ $json.content || $json.contentSnippet }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        736,
+        -176
+      ],
+      "id": "cadcb0bc-7ea3-4360-bed8-61906fb14bd0",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        736,
+        0
+      ],
+      "id": "d6f656b9-7142-4ff5-a1f7-43d0ed0d5441",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "XXWwfQLd2KspcYbi",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=Title: [{{ $('Code in JavaScript').item.json.source }}] {{ $('Filter').item.json.title }}\nURL: {{ $('Filter').item.json.link }}\nDescription: {{ $json.output }}\n\n*━━━━━━━━━━━━━━━━━━━━━*",
+        "options": {},
+        "embeds": {
+          "values": [
+            {
+              "image": "="
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        -176
+      ],
+      "id": "c5d13c6c-11d8-4b46-a0dd-ee1cd959fba9",
+      "name": "Discord",
+      "webhookId": "10b18fde-339e-42cd-86a9-f706fffa0fbf",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "klL73p3AlRuMw6zp",
+          "name": "#race-cars"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "getAll",
+        "guildId": {
+          "__rl": true,
+          "value": "YOUR_DISCORD_GUILD_ID",
+          "mode": "list",
+          "cachedResultName": "hotroddder",
+          "cachedResultUrl": "https://discord.com/channels/YOUR_DISCORD_GUILD_ID"
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "1480583587446128740",
+          "mode": "list",
+          "cachedResultName": "race-cars",
+          "cachedResultUrl": "https://discord.com/channels/YOUR_DISCORD_GUILD_ID/1480583587446128740"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        64,
+        176
+      ],
+      "id": "aa6219e9-2578-4751-8142-bd61932825bf",
+      "name": "Get many messages",
+      "webhookId": "2c04292c-1d0b-4dfc-9591-3f15d74f9e57",
+      "credentials": {
+        "discordBotApi": {
+          "id": "W7YBbBYCWMCmfd3D",
+          "name": "Obsidian"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "986bd393-abb8-419f-b696-021560323aac",
+              "leftValue": "={{ DateTime.fromISO($json.timestamp) }}",
+              "rightValue": "={{ $now.minus(7, 'days') }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            },
+            {
+              "id": "a2777f58-e880-4e2c-a33d-3c3537d42e52",
+              "leftValue": "={{ $json.author.id }}",
+              "rightValue": "1504169325571870780",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        272,
+        176
+      ],
+      "id": "53d979ab-2f6d-422f-a53e-8b019c5f4396",
+      "name": "Filter1"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=COMING UP: \n{{ $json.series }} {{ $json.subseries }}\n{{ $json.event_type || $json.event_name || \"Race\" }} @ {{ $json.race_track }}\n{{ DateTime.fromISO($json.event_time).format('LL/dd/yyyy t') }}",
+        "options": {},
+        "embeds": {
+          "values": [
+            {
+              "image": "="
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        1056,
+        176
+      ],
+      "id": "d562f8bd-478d-4ecf-9703-12981ba2645f",
+      "name": "Discord1",
+      "webhookId": "10b18fde-339e-42cd-86a9-f706fffa0fbf",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "klL73p3AlRuMw6zp",
+          "name": "#race-cars"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "86ceb22e-2c60-4b5c-a48e-5451e073f57b",
+              "leftValue": "={{ $json.event_time }}",
+              "rightValue": "={{ $now.minus(5, 'minutes') }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            },
+            {
+              "id": "529a8091-2c01-4768-8b5e-5240ddfda8e8",
+              "leftValue": "={{ DateTime.fromISO($json.event_time) }}",
+              "rightValue": "={{ $now.plus(65, 'minutes') }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "before"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        848,
+        176
+      ],
+      "id": "a9e4ec7b-54d2-47d4-b334-dc41323c70f0",
+      "name": "Filter2"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "event",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        672,
+        176
+      ],
+      "id": "71374626-79b6-4fca-9f88-cd84549e182d",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst events = [];\nlet currentSeries = \"\";\nlet currentTrack = \"\";\n\n// Pre-compiled regex patterns\nconst discordEmojiRegex = /<:[a-zA-Z0-9_]+:\\d+>/g;\nconst timestampRegex = /<t:(\\d+):[a-zA-Z]>/;\nconst flagsRegex = /[\\uD83C][\\uDDE6-\\uDDFF]/g; \nconst typeKeywords = ['qualifying', 'practice', 'race', 'broadcast', 'test', 'warmup', 'sprint'];\n\nconst lines = $input.first().json.content.split('\\n');\n\nfor (let line of lines) {\n  line = line.trim();\n  if (!line || line.startsWith('-#')) continue;\n\n  // --- 1. HANDLE HEADINGS ---\n  if (line.startsWith('###')) {\n    let cleanLine = line.replace('###', '').trim();\n    cleanLine = cleanLine.replace(discordEmojiRegex, '');\n    cleanLine = cleanLine.replace(flagsRegex, '');\n    \n    // Split series and track by em-dash or standard dash\n    const parts = cleanLine.split(/\\s+—\\s+|\\s+--\\s+|\\s+-\\s+/);\n    if (parts.length >= 2) {\n      currentSeries = parts[0].trim();\n      currentTrack = parts.slice(1).join(' - ').trim();\n    }\n    continue;\n  }\n\n  // --- 2. HANDLE EVENT LINES ---\n  if (line.startsWith('-') && line.includes('<t:')) {\n    const timeMatch = line.match(timestampRegex);\n    if (!timeMatch) continue;\n\n    const unixTimestamp = parseInt(timeMatch[1], 10);\n    \n    const date = new Date(unixTimestamp * 1000);\n    // Render the event time in America/Chicago, honoring CST/CDT automatically.\n    const tz = \"America/Chicago\";\n    const offset = new Intl.DateTimeFormat(\"en-US\", { timeZone: tz, timeZoneName: \"longOffset\" })\n      .formatToParts(date).find(p => p.type === \"timeZoneName\").value.replace(\"GMT\", \"\") || \"+00:00\";\n    const wallClock = new Intl.DateTimeFormat(\"sv-SE\", {\n      timeZone: tz, year: \"numeric\", month: \"2-digit\", day: \"2-digit\",\n      hour: \"2-digit\", minute: \"2-digit\", second: \"2-digit\", hour12: false,\n    }).format(date);\n    const eventTime = wallClock.replace(\" \", \"T\") + offset;\n\n    // Clean the event string\n    let textAfterTime = line.replace(/^-\\s*<t:\\d+:[a-zA-Z]>\\s*(?:—|-)?\\s*/, '');\n    \n    // Split by semicolon to drop extra broadcast/flag data\n    let mainEventText = textAfterTime.split(';')[0];\n    \n    // Strip out Discord emojis and markdown italics/bold\n    mainEventText = mainEventText.replace(discordEmojiRegex, '');\n    mainEventText = mainEventText.replace(/\\*\\*.*?\\*\\*|\\*.*?\\*/g, '').trim();\n\n    // --- 3. PARSE SUBSERIES, NAME, AND TYPE ---\n    let subseries = \"\";\n    let eventName = \"\";\n    let eventType = \"\";\n\n    const detailParts = mainEventText.split(/\\s+-\\s+|\\s+—\\s+/);\n    let eventString = \"\";\n\n    if (detailParts.length >= 2) {\n      subseries = detailParts[0].trim();\n      eventString = detailParts.slice(1).join(' - ').trim();\n    } else {\n      eventString = detailParts[0].trim();\n    }\n\n    // Determine if the string is an event TYPE or an event NAME\n    const isType = typeKeywords.some(keyword => eventString.toLowerCase().includes(keyword));\n    if (isType) {\n      eventType = eventString;\n    } else {\n      eventName = eventString;\n    }\n\n    // Push to events array\n    events.push({\n      event_time: eventTime,\n      series: currentSeries,\n      subseries: subseries,\n      event_type: eventType,\n      event_name: eventName,\n      race_track: currentTrack\n    });\n  }\n}\n\n// Return the structured data in the format n8n expects\nreturn [{\n  json: {\n    event: events\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        176
+      ],
+      "id": "752e9925-8015-4b98-8129-e4d9b3be8e61",
+      "name": "Code in JavaScript1"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get many messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages": {
+      "main": [
+        [
+          {
+            "node": "Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter2": {
+      "main": [
+        [
+          {
+            "node": "Discord1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Filter2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": [
+        16
+      ]
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "activeVersionId": "cbb90b05-7d13-4da7-ae5f-b32a4f9a38b7",
+  "versionCounter": 1171,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-07-22T19:33:24.426Z",
+      "createdAt": "2026-07-22T19:33:24.426Z",
+      "role": "workflow:owner",
+      "workflowId": "chVd0dSCUbOxpqvp",
+      "projectId": "AEOc7ItfeVbix4Xj",
+      "project": {
+        "updatedAt": "2026-05-01T15:53:57.128Z",
+        "createdAt": "2026-05-01T15:52:52.704Z",
+        "id": "AEOc7ItfeVbix4Xj",
+        "name": "Brandon Broxterman <your-email@example.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "fffcfd66-9d8f-4fb2-a842-731844fe3100"
+      }
+    }
+  ]
+}
