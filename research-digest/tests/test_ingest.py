@@ -20,7 +20,7 @@ def test_ingest_stores_items_and_isolates_failing_feeds(conn, fixture_bytes):
             FeedConfig(name="Example Lab", url="https://lab.example.com/feed"),
         ],
         interests="",
-        relevance_threshold=7,
+        relevance_threshold=0.7,
         max_age_days=36500,
     )
     client = httpx.Client(transport=httpx.MockTransport(handler))

@@ -71,9 +71,8 @@ its own agent, then routed to a different Discord channel (`#dev-release-notes`,
 ### [`research-digest/`](research-digest/)
 
 A Python service that runs alongside n8n for jobs that are easier to write as code. It pulls new
-arXiv papers and AI lab blog posts, has an LLM triage and summarize them, posts each summary to
-Discord, serves a read-only web page of summaries, and sends a morning digest by Discord and
-email. See its [plan](research-digest/PLAN.md) for design and progress.
+arXiv papers and AI lab blog posts, scores relevance with a decision model, summarizes what passes,
+serves a read-only web page of summaries, and sends one morning digest by Discord and email. See its [plan](research-digest/PLAN.md) for design and progress.
 
 ## Roadmap
 

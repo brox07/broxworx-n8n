@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS articles (
   status            TEXT        NOT NULL DEFAULT 'new'
                     CHECK (status IN ('new', 'relevant', 'skipped', 'summarized', 'failed')),
   attempts          INT         NOT NULL DEFAULT 0,
-  relevance_score   SMALLINT,
-  relevance_reason  TEXT,
+  relevance_score   REAL,          -- probability 0–1 from the decision model
+  scorer            TEXT,
   summary           TEXT,
   key_points        JSONB,
   tags              TEXT[],

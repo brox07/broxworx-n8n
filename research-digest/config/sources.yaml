@@ -25,13 +25,13 @@ feeds:
   - name: Berkeley AI Research
     url: https://bair.berkeley.edu/blog/feed.xml
 
-# Used by the triage step (phase 2) to score arXiv abstracts.
+# Used by the relevance scorer (phase 2) to judge arXiv abstracts.
 interests: |
   LLM agents and tool use, reasoning and test-time compute, AI safety and
   interpretability, evaluation and benchmarks, efficient inference, and
   practical techniques I could apply when building LLM-powered automations.
 
-relevance_threshold: 7   # 0–10; arXiv papers scoring below this are stored but not posted
+relevance_threshold: 0.7   # probability 0–1; arXiv papers below this are stored but left out of the digest
 
 # Feed entries older than this are ignored on ingest, so adding a new feed
 # doesn't backfill its entire history into Discord.

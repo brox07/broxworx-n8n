@@ -1,15 +1,15 @@
 # research-digest
 
 Scheduled jobs that don't live in n8n. This one collects new AI research (arXiv and lab blogs),
-summarizes the relevant items with an LLM, posts them to Discord, serves a small web page of
-summaries, and sends a morning digest.
+scores relevance with a decision model (Jev or Clef), summarizes what passes with an LLM, serves a
+small web page of summaries, and sends one morning digest by Discord and email.
 
 See [PLAN.md](PLAN.md) for the agreed design and phase checklist.
 
 ## Status
 
-Phase 1 is done: sources are fetched and stored idempotently in Postgres. Triage,
-summarization, delivery, the web app, and deployment are still to come.
+Phase 1 is done: sources are fetched and stored idempotently in Postgres. Relevance
+scoring, summarization, the digest, the web app, and deployment are still to come.
 
 ## Local development
 

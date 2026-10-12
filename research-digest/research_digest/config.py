@@ -25,7 +25,7 @@ class Config:
     arxiv: ArxivConfig | None
     feeds: list[FeedConfig]
     interests: str
-    relevance_threshold: int
+    relevance_threshold: float
     max_age_days: int
 
 
@@ -45,6 +45,6 @@ def load_config(path: str | os.PathLike | None = None) -> Config:
         arxiv=arxiv,
         feeds=[FeedConfig(**f) for f in raw.get("feeds") or []],
         interests=(raw.get("interests") or "").strip(),
-        relevance_threshold=int(raw.get("relevance_threshold", 7)),
+        relevance_threshold=float(raw.get("relevance_threshold", 0.7)),
         max_age_days=int(raw.get("max_age_days", 3)),
     )
