@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<rss xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0">
+  <channel>
+    <title>cs.AI, cs.CL updates on arXiv.org</title>
+    <link>http://rss.arxiv.org/rss/cs.AI+cs.CL</link>
+    <description>cs.AI, cs.CL updates on the arXiv.org e-print archive.</description>
+    <item>
+      <title>Agents That Plan: Test-Time Search
+ for Tool Use</title>
+      <link>https://arxiv.org/abs/2610.01234</link>
+      <description>arXiv:2610.01234v1 Announce Type: new 
+Abstract: We present a method for
+ planning over tool calls.</description>
+      <guid isPermaLink="false">oai:arXiv.org:2610.01234v1</guid>
+      <category>cs.AI</category>
+      <pubDate>Mon, 12 Oct 2026 00:00:00 -0400</pubDate>
+      <arxiv:announce_type>new</arxiv:announce_type>
+      <dc:rights>http://creativecommons.org/licenses/by/4.0/</dc:rights>
+      <dc:creator>Alice Smith, Bob Jones</dc:creator>
+    </item>
+    <item>
+      <title>A Cross-Listed Paper</title>
+      <link>https://arxiv.org/abs/2610.05555</link>
+      <description>arXiv:2610.05555v1 Announce Type: cross 
+Abstract: Cross-listed from stat.ML.</description>
+      <guid isPermaLink="false">oai:arXiv.org:2610.05555v1</guid>
+      <category>cs.CL</category>
+      <pubDate>Mon, 12 Oct 2026 00:00:00 -0400</pubDate>
+      <arxiv:announce_type>cross</arxiv:announce_type>
+      <dc:creator>Carol Lee</dc:creator>
+    </item>
+    <item>
+      <title>An Old Paper, Revised</title>
+      <link>https://arxiv.org/abs/2401.00001</link>
+      <description>arXiv:2401.00001v3 Announce Type: replace 
+Abstract: Revised version.</description>
+      <guid isPermaLink="false">oai:arXiv.org:2401.00001v3</guid>
+      <category>cs.AI</category>
+      <pubDate>Mon, 12 Oct 2026 00:00:00 -0400</pubDate>
+      <arxiv:announce_type>replace</arxiv:announce_type>
+      <dc:creator>Dan Old</dc:creator>
+    </item>
+  </channel>
+</rss>

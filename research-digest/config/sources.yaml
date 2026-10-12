@@ -1,0 +1,38 @@
+# What to collect and how to judge it. Secrets live in .env, not here.
+
+arxiv:
+  # Fetched as one combined feed (rss.arxiv.org/rss/cs.AI+cs.LG+cs.CL), which
+  # already collapses papers cross-listed in several of these categories.
+  categories: [cs.AI, cs.LG, cs.CL]
+  # new   = first announcement of a paper
+  # cross = cross-listed into one of our categories from elsewhere
+  # replace / replace-cross = a revised version of an older paper — skipped
+  announce_types: [new, cross]
+
+# Lab / company research blogs. Any RSS or Atom URL works here.
+# Anthropic and Meta AI publish no official feed; they need a page scraper (later phase).
+feeds:
+  - name: OpenAI
+    url: https://openai.com/news/rss.xml
+  - name: Google DeepMind
+    url: https://deepmind.google/blog/rss.xml
+  - name: Google Research
+    url: https://research.google/blog/rss/
+  - name: Microsoft Research
+    url: https://www.microsoft.com/en-us/research/feed/
+  - name: Hugging Face
+    url: https://huggingface.co/blog/feed.xml
+  - name: Berkeley AI Research
+    url: https://bair.berkeley.edu/blog/feed.xml
+
+# Used by the triage step (phase 2) to score arXiv abstracts.
+interests: |
+  LLM agents and tool use, reasoning and test-time compute, AI safety and
+  interpretability, evaluation and benchmarks, efficient inference, and
+  practical techniques I could apply when building LLM-powered automations.
+
+relevance_threshold: 7   # 0–10; arXiv papers scoring below this are stored but not posted
+
+# Feed entries older than this are ignored on ingest, so adding a new feed
+# doesn't backfill its entire history into Discord.
+max_age_days: 3

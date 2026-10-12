@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Example Lab Blog</title>
+    <link>https://lab.example.com/blog</link>
+    <item>
+      <title>Introducing a New Model</title>
+      <link>https://lab.example.com/blog/new-model</link>
+      <guid isPermaLink="false">post-123</guid>
+      <description>&lt;p&gt;Today we &lt;b&gt;release&lt;/b&gt; a new model.&lt;/p&gt;</description>
+      <pubDate>Sun, 11 Oct 2026 15:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>An Ancient Post</title>
+      <link>https://lab.example.com/blog/ancient</link>
+      <pubDate>Mon, 01 Jan 2024 15:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>
