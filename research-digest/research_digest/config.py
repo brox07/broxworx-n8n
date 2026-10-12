@@ -27,6 +27,9 @@ class Config:
     interests: str
     relevance_threshold: float
     max_age_days: int
+    scorer_model: str = "@cf/cloudflare/clef-flash"
+    cloudflare_account_id: str | None = None
+    cloudflare_ai_token: str | None = None
 
 
 def load_config(path: str | os.PathLike | None = None) -> Config:
@@ -47,4 +50,7 @@ def load_config(path: str | os.PathLike | None = None) -> Config:
         interests=(raw.get("interests") or "").strip(),
         relevance_threshold=float(raw.get("relevance_threshold", 0.7)),
         max_age_days=int(raw.get("max_age_days", 3)),
+        scorer_model=(raw.get("scorer") or {}).get("model", "@cf/cloudflare/clef-flash"),
+        cloudflare_account_id=os.environ.get("CLOUDFLARE_ACCOUNT_ID"),
+        cloudflare_ai_token=os.environ.get("CLOUDFLARE_AI_API_TOKEN"),
     )

@@ -12,7 +12,7 @@ decision changes.
 | Topic | Decision |
 | --- | --- |
 | Sources | **arXiv categories** (via the arXiv API) and **AI lab / company blogs** (via RSS/Atom). Both configured in `config/sources.yaml`. |
-| Relevance scoring | A **decision model, Jev (TypeSafe) or Clef (Cloudflare)**, rather than a chat LLM. These models answer a structured question ("is this paper relevant to this interests profile?") with a probability in one pass, which is quicker, cheaper and easier to put a threshold on than parsing a 0–10 score out of generated text. It sits behind a small `Scorer` interface, so switching between Jev, Clef or an LLM fallback is a config change. **Open:** which one, and its API details (see Open questions). |
+| Relevance scoring | **Clef-flash** (Cloudflare's 9B decision model) on **Workers AI**, called with a Cloudflare API token. A decision model answers a typed question with a probability in one pass, which is quicker, cheaper and easier to put a threshold on than parsing a 0–10 score out of generated text. Each paper gets one `noul` (yes/no) question with the interests profile in its instructions, and the answer *is* the relevance probability. It sits behind a small `Scorer` interface, so switching to the 27B `clef` or another backend is a config change. |
 | Summaries | **OpenRouter**, the provider the n8n workflows already use. Only items that pass scoring get summarized. |
 | Volume control | arXiv papers whose relevance probability is below `relevance_threshold` are stored but left out of the digest. Lab blog posts skip scoring because there are only a few a day. Everything stays searchable in the web app either way. |
 | Delivery | **One morning digest, no per-article messages.** arXiv publishes once a day, around 20:00 ET Sunday through Thursday, so a day's papers arrive together anyway. At 07:00 America/Chicago a single run sends the Discord message and the email. It covers everything summarized since the previous digest went out, not "the last 24h", so a missed morning catches up instead of dropping items. Friday and Saturday nights have no arXiv mailing, so weekend digests carry only blog posts, and an empty digest is skipped. |
@@ -46,9 +46,11 @@ on the next tick.
 1. **Ingest:** fetch every configured source. Upsert into `articles` keyed on a stable
    fingerprint (arXiv id without version, or the RSS guid/link), so re-fetching never duplicates.
    New rows start as `new`.
-2. **Score** (arXiv only): ask the decision model whether title + abstract match the interests
-   profile and get back a relevance probability. Scoring is batched, since the whole evening drop
-   (500+ papers) lands at once. At or above `relevance_threshold` the item becomes `relevant`,
+2. **Score** (arXiv only): send title + abstract to Clef as the `state`, along with one yes/no
+   question carrying the interests profile, and get back a relevance probability. Clef caps
+   `state` at 2,000 bytes after JSON serialization, so long abstracts are trimmed to fit. That's
+   one request per paper, run 8 at a time, so the 500+ paper evening drop takes a minute or two.
+   Errors increment `attempts`, and a paper becomes `failed` after 3. At or above `relevance_threshold` the item becomes `relevant`,
    otherwise `skipped`. Lab blog posts go straight to `relevant`.
 3. **Summarize:** for arXiv, use the abstract (later, optionally the full text from arxiv.org/html).
    For blogs, extract the article body from the page. The summarize model returns
@@ -88,7 +90,7 @@ Secrets come from `.env`. The rest lives in `config/sources.yaml`.
 | Variable | Purpose |
 | --- | --- |
 | `RESEARCH_DATABASE_URL` | Postgres DSN for the `research` database |
-| `SCORER_API_KEY` (name TBD per provider) | Jev or Clef access |
+| `CLOUDFLARE_ACCOUNT_ID` / `CLOUDFLARE_AI_API_TOKEN` | Clef on Workers AI. The token needs the *Workers AI* permission. It's separate from the tunnel token. |
 | `OPENROUTER_API_KEY` | Summaries and digest intro |
 | `DISCORD_DIGEST_WEBHOOK_URL` | Morning roll-up |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` / `DIGEST_EMAIL_FROM` / `DIGEST_EMAIL_TO` | Digest email. Any SMTP provider works (Gmail app password, Resend, Fastmail, …). |
@@ -102,8 +104,8 @@ relevance threshold, the model names, and the schedule times.
 - [x] **0. Plan**: this document.
 - [x] **1. Skeleton + ingest**: package layout, config loading, schema/migrations, arXiv and RSS
       fetchers, idempotent upsert, `python -m research_digest ingest` CLI, tests.
-- [ ] **2. Relevance scoring**: `Scorer` interface, a Jev or Clef adapter, batching, and status
-      transitions. Blocked on the Open question below.
+- [x] **2. Relevance scoring**: `Scorer` interface, Clef adapter on the Workers AI REST API,
+      state trimming, parallel scoring, status transitions and retry cap, `score` CLI command.
 - [ ] **3. Summarization**: OpenRouter client, JSON-output prompt, retry/attempt cap, cost guard
       (max items per run).
 - [ ] **4. Daily digest**: grouping, LLM intro, Discord messages split under the 2,000-char
@@ -115,13 +117,14 @@ relevance threshold, the model names, and the schedule times.
 
 ## Open questions / later
 
-- **Jev or Clef, and how to call it.** These are decision models: they return probabilities
-  over a fixed set of options instead of generating text. Jev comes from TypeSafe and is closed,
-  behind an API. Clef comes from Cloudflare (released 2026-10-01) in 27B and 9B "flash" sizes as
-  open weights under Apache 2.0. I haven't been able to confirm either one's API: the endpoint,
-  request schema and auth. Clef might be served on Workers AI, but that isn't confirmed yet.
-  Self-hosting Clef-flash would need a GPU, which this Docker host may not have. Needed before
-  Phase 2: the choice of model and a link to its API docs or model card.
+- **Check Clef's response shape on the first live call.** The adapter was written from
+  Cloudflare's docs as reported in search results, because the docs pages couldn't be fetched
+  from the build sandbox. It expects `result.answers.relevant` to be a bare probability and
+  also accepts `{"probability": …}`. Anything else fails loudly with the raw response in the
+  log. Run `python -m research_digest score --limit 5` once to confirm.
+- **Tune the threshold** once there are real scores to look at. 0.7 is a starting guess.
+- Clef is also on OpenRouter, but through a separate Decisions API rather than chat
+  completions. Workers AI is the documented path, so we use that.
 - **Which SMTP provider** for the digest email.
 
 - Full-text summarization for arXiv (HTML version) once abstract-only quality has been checked.

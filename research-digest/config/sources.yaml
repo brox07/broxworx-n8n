@@ -25,7 +25,12 @@ feeds:
   - name: Berkeley AI Research
     url: https://bair.berkeley.edu/blog/feed.xml
 
-# Used by the relevance scorer (phase 2) to judge arXiv abstracts.
+# Cloudflare's Clef decision model on Workers AI. Clef-flash (9B) is cheap and fast;
+# switch to "@cf/cloudflare/clef" (27B) if relevance calls look sloppy.
+scorer:
+  model: "@cf/cloudflare/clef-flash"
+
+# Passed to Clef as the question it answers for each arXiv paper. Keep it concise.
 interests: |
   LLM agents and tool use, reasoning and test-time compute, AI safety and
   interpretability, evaluation and benchmarks, efficient inference, and
